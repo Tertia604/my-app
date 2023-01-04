@@ -1,54 +1,35 @@
 <template>
-  <div class="p-8">
+  <div class="p-8 pb-0">
+    <h1 class="text-4xl font-bold mb-4 text-orange-500">
+      Search Meals by Name
+    </h1>
+  </div>
+  <div class="p-8 pb-3">
     <input
       type="text"
-      class="rounded border-2 border-gray-200 w-full"
+      class="rounded border-2 bg-white border-gray-200 focus:ring-orange-500 focus:border-orange-500 w-full"
       placeholder="Search for meals..."
       v-model="keyword"
       @change="searchMeals"
     />
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-8">
-    <div
-      v-for="meal of meals"
-      :key="meal.idMeal"
-      class="bg-white shadow rounded-xl"
-    >
-      <router-link to="/">
-        <img
-          :src="meal.strMealThumb"
-          :alt="meal.strMeal"
-          class="rounded-t-xl h-48 w-full object-cover"
-        />
-      </router-link>
-      <div class="p-3">
-        <h3 class="font-bold">{{ meal.strMeal }}</h3>
-        <p class="mb-4">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aut, facilis
-          in nesciunt officia temporibus voluptatibus!
-        </p>
-        <div class="flex items-center justify-between">
-          <a
-            :href="meal.strYoutube"
-            target="_blank"
-            class="px-3 py-2 rounded border-2 border-red-600 bg-red-600 text-white"
-            >YouTube</a
-          >
-        </div>
-      </div>
-    </div>
-  </div>
+  <Meals :meals="meals" />
+  <!--  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 p-8">-->
+  <!--    <MealItem v-for="meal of meals" :key="meal.idMeal" :meal="meal" />-->
+  <!--  </div>-->
 </template>
 
 <script>
 import { computed, onMounted, ref } from "vue";
 import store from "../store/index.js";
 import { useRoute } from "vue-router";
+import MealItem from "../components/MealItem.vue";
+import Meals from "../components/Meals.vue";
 
 export default {
   name: "MealsByName",
-
+  components: { Meals, MealItem },
   setup() {
     const route = useRoute();
 
@@ -56,13 +37,17 @@ export default {
     const meals = computed(() => store.state.searchedMeals);
 
     function searchMeals() {
-      store.dispatch("searchMeals", keyword.value);
-      keyword.value = "";
+      if (keyword.value) {
+        store.dispatch("searchMeals", keyword.value);
+      } else {
+        store.commit("setSearchedMeals", []);
+      }
     }
 
-    onMounted(() => {
-      keyword.value = route.params.name;
-    });
+    keyword.value = route.params.name;
+    if (keyword.value) {
+      searchMeals();
+    }
 
     return {
       keyword,
